@@ -24,7 +24,8 @@ async function start() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
     cors: {
-      ...(!process.env.NOT_SECURED ? { credentials: true } : {}),
+      // Always allow credentials so localhost (and production) can send session cookies.
+      credentials: true,
       allowedHeaders: [
         'Content-Type',
         'Authorization',
@@ -37,8 +38,10 @@ async function start() {
         'reload',
         'onboarding',
         'activate',
+        'auth',
+        'showorg',
+        'impersonate',
         'x-copilotkit-runtime-client-gql-version',
-        ...(process.env.NOT_SECURED ? ['auth', 'showorg', 'impersonate'] : []),
       ],
       origin: [
         process.env.FRONTEND_URL,

@@ -1,0 +1,26 @@
+{
+  "hosting": {
+    "public": "apps/frontend/public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "run": {
+          "serviceId": "BACKEND_CLOUD_RUN_SERVICE",
+          "region": "PLACEHOLDER_REGION"
+        }
+      },
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "FRONTEND_CLOUD_RUN_SERVICE",
+          "region": "PLACEHOLDER_REGION"
+        }
+      }
+    ]
+  }
+}

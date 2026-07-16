@@ -1,0 +1,86 @@
+# Skeleton — replace PLACEHOLDER_* before deploy.
+# NestJS API; listens on port 3000 (see var/docker/nginx.conf).
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: PLACEHOLDER_BACKEND_SERVICE_NAME
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/launch-stage: BETA
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      serviceAccountName: PLACEHOLDER_BACKEND_SERVICE_ACCOUNT
+      containers:
+        - image: PLACEHOLDER_ARTIFACT_REGISTRY_IMAGE_BACKEND
+          ports:
+            - name: http1
+              containerPort: 3000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: DATABASE_URL
+                  key: latest
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: REDIS_URL
+                  key: latest
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: JWT_SECRET
+                  key: latest
+            - name: TEMPORAL_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: TEMPORAL_ADDRESS
+                  key: latest
+            - name: STORAGE_PROVIDER
+              value: gcs
+            - name: GCS_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: GCS_BUCKET
+                  key: latest
+            - name: GCS_PUBLIC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: GCS_PUBLIC_URL
+                  key: latest
+            - name: GCS_PROJECT_ID
+              value: PLACEHOLDER_GCP_PROJECT_ID
+            - name: FIREBASE_PROJECT_ID
+              value: cheeky-b0098
+            - name: FIREBASE_CLIENT_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: FIREBASE_CLIENT_EMAIL
+                  key: latest
+            - name: FIREBASE_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: FIREBASE_PRIVATE_KEY
+                  key: latest
+            - name: MAIN_URL
+              valueFrom:
+                secretKeyRef:
+                  name: MAIN_URL
+                  key: latest
+            - name: FRONTEND_URL
+              valueFrom:
+                secretKeyRef:
+                  name: FRONTEND_URL
+                  key: latest
+          resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi

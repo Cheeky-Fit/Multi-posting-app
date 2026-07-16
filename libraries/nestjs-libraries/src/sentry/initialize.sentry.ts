@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/nestjs';
-import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import { capitalize } from 'lodash';
 
 export const initializeSentry = (appName: string, allowLogs = false) => {
@@ -8,6 +7,20 @@ export const initializeSentry = (appName: string, allowLogs = false) => {
   }
 
   try {
+    // Lazy-load profiling so local/dev without a matching native binary can still boot.
+    let profilingIntegration: ReturnType<
+      typeof import('@sentry/profiling-node').nodeProfilingIntegration
+    > | null = null;
+    try {
+      const { nodeProfilingIntegration } = require('@sentry/profiling-node');
+      profilingIntegration = nodeProfilingIntegration();
+    } catch (profilingErr) {
+      console.warn(
+        'Sentry profiling unavailable; continuing without it',
+        profilingErr
+      );
+    }
+
     Sentry.init({
       initialScope: {
         tags: {
@@ -24,8 +37,7 @@ export const initializeSentry = (appName: string, allowLogs = false) => {
       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
       spotlight: process.env.SENTRY_SPOTLIGHT === '1',
       integrations: [
-        // Add our Profiling integration
-        nodeProfilingIntegration(),
+        ...(profilingIntegration ? [profilingIntegration] : []),
         Sentry.consoleLoggingIntegration({ levels: ['log', 'info', 'warn', 'error', 'debug', 'assert', 'trace'] }),
         Sentry.openAIIntegration({
           recordInputs: true,

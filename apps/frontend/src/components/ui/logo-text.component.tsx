@@ -1,6 +1,14 @@
 import React from 'react';
 
-export const LogoTextComponent = () => {
+export const LogoTextComponent = ({ cheeky = false }: { cheeky?: boolean }) => {
+  if (cheeky) {
+    return (
+      <span className="text-[28px] font-[600] -tracking-[0.56px]">
+        Cheeky <span className="text-[#FC69FF]">Social</span>
+      </span>
+    );
+  }
+
   return (
     <svg
       width="101"

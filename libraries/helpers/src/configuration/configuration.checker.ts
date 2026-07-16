@@ -31,6 +31,9 @@ export class ConfigurationChecker {
     this.checkIsValidUrl('NEXT_PUBLIC_BACKEND_URL');
     this.checkIsValidUrl('BACKEND_INTERNAL_URL');
     this.checkNonEmpty('STORAGE_PROVIDER', 'Needed to setup storage.');
+    if (this.get('STORAGE_PROVIDER') === 'gcs') {
+      this.checkNonEmpty('GCS_BUCKET', 'Required when STORAGE_PROVIDER=gcs.');
+    }
   }
 
   checkNonEmpty(key: string, description?: string): boolean {

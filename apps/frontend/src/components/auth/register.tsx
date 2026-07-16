@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { LoadingComponent } from '@gitroom/frontend/components/layout/loading';
 import clsx from 'clsx';
 import { GoogleProvider } from '@gitroom/frontend/components/auth/providers/google.provider';
+import { FirebaseGoogleProvider } from '@gitroom/frontend/components/auth/providers/firebase-google.provider';
 import { OauthProvider } from '@gitroom/frontend/components/auth/providers/oauth.provider';
 import { useFireEvents } from '@gitroom/helpers/utils/use.fire.events';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
@@ -89,6 +90,7 @@ export function RegisterAfter({
   provider: string;
 }) {
   const t = useT();
+  const cheekyMode = process.env.NEXT_PUBLIC_CHEEKY_MODE === 'true';
   const { isGeneral, genericOauth, neynarClientId, billingEnabled } =
     useVariables();
   const [loading, setLoading] = useState(false);
@@ -109,6 +111,7 @@ export function RegisterAfter({
       provider: provider,
     },
   });
+  const company = form.watch('company');
   const fetchData = useFetch();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setLoading(true);
@@ -159,7 +162,19 @@ export function RegisterAfter({
           </div>
           <div className="flex flex-col">
             {!isAfterProvider &&
-              (!isGeneral ? (
+              (cheekyMode ? (
+                <>
+                  <Input
+                    label="Company"
+                    translationKey="label_company"
+                    {...form.register('company')}
+                    autoComplete="off"
+                    type="text"
+                    placeholder={t('label_company', 'Company')}
+                  />
+                  <FirebaseGoogleProvider mode="register" company={company} />
+                </>
+              ) : !isGeneral ? (
                 <GithubProvider />
               ) : (
                 <div className="gap-[8px] flex">
@@ -172,7 +187,7 @@ export function RegisterAfter({
                   {billingEnabled && <WalletProvider />}
                 </div>
               ))}
-            {!isAfterProvider && (
+            {!isAfterProvider && !cheekyMode && (
               <div className="h-[20px] mb-[24px] mt-[24px] relative">
                 <div className="absolute w-full h-[1px] bg-fifth top-[50%] -translate-y-[50%]" />
                 <div
@@ -184,7 +199,7 @@ export function RegisterAfter({
             )}
             <div className="flex flex-col gap-[12px]">
               <div className="text-textColor">
-                {!isAfterProvider && (
+                {!isAfterProvider && !cheekyMode && (
                   <>
                     <Input
                       label="Email"
@@ -203,14 +218,26 @@ export function RegisterAfter({
                     />
                   </>
                 )}
-                <Input
-                  label="Company"
-                  translationKey="label_company"
-                  {...form.register('company')}
-                  autoComplete="off"
-                  type="text"
-                  placeholder={t('label_company', 'Company')}
-                />
+                {!cheekyMode && (
+                  <Input
+                    label="Company"
+                    translationKey="label_company"
+                    {...form.register('company')}
+                    autoComplete="off"
+                    type="text"
+                    placeholder={t('label_company', 'Company')}
+                  />
+                )}
+                {cheekyMode && isAfterProvider && (
+                  <Input
+                    label="Company"
+                    translationKey="label_company"
+                    {...form.register('company')}
+                    autoComplete="off"
+                    type="text"
+                    placeholder={t('label_company', 'Company')}
+                  />
+                )}
               </div>
               <div className={clsx('text-[12px]')}>
                 {t(
@@ -237,15 +264,17 @@ export function RegisterAfter({
                 &nbsp;
               </div>
               <div className="text-center mt-6">
-                <div className="w-full flex">
-                  <Button
-                    type="submit"
-                    className="flex-1 rounded-[10px] !h-[52px]"
-                    loading={loading}
-                  >
-                    {t('create_account', 'Create Account')}
-                  </Button>
-                </div>
+                {!cheekyMode && (
+                  <div className="w-full flex">
+                    <Button
+                      type="submit"
+                      className="flex-1 rounded-[10px] !h-[52px]"
+                      loading={loading}
+                    >
+                      {t('create_account', 'Create Account')}
+                    </Button>
+                  </div>
+                )}
                 <p className="mt-4 text-sm">
                   {t('already_have_an_account', 'Already Have An Account?')}
                   &nbsp;
