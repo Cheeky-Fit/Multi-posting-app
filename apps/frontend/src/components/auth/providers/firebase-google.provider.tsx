@@ -11,6 +11,22 @@ type Props = {
   company?: string;
 };
 
+function resolveCompanyName(
+  company?: string,
+  displayName?: string | null,
+  email?: string
+): string {
+  const candidate =
+    company?.trim() ||
+    displayName?.trim() ||
+    email?.split('@')[0]?.trim() ||
+    '';
+  if (candidate.length >= 3) {
+    return candidate.slice(0, 128);
+  }
+  return 'My workspace';
+}
+
 export const FirebaseGoogleProvider = ({ mode, company }: Props) => {
   const fetch = useFetch();
   const t = useT();
@@ -23,11 +39,11 @@ export const FirebaseGoogleProvider = ({ mode, company }: Props) => {
       const result = await signInWithPopup(auth, new GoogleAuthProvider());
       const idToken = await result.user.getIdToken();
       const email = result.user.email || '';
-      const workspace =
-        company?.trim() ||
-        result.user.displayName?.trim() ||
-        email.split('@')[0] ||
-        'My workspace';
+      const workspace = resolveCompanyName(
+        company,
+        result.user.displayName,
+        email
+      );
 
       const path = mode === 'register' ? '/auth/register' : '/auth/login';
       const body =
@@ -55,9 +71,6 @@ export const FirebaseGoogleProvider = ({ mode, company }: Props) => {
         const msg = await res.text();
         throw new Error(msg || 'Auth failed');
       }
-
-      // Existing auth flows set cookie via response; hard navigate home.
-      window.location.href = '/';
     } catch (e) {
       console.error(e);
       setLoading(false);
