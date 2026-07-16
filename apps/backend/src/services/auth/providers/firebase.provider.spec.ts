@@ -13,6 +13,12 @@ import * as admin from 'firebase-admin';
 import { FirebaseProvider } from './firebase.provider';
 
 describe('FirebaseProvider', () => {
+  beforeAll(() => {
+    process.env.FIREBASE_PROJECT_ID = 'test-project';
+    process.env.FIREBASE_CLIENT_EMAIL = 'test@test.com';
+    process.env.FIREBASE_PRIVATE_KEY = 'fake-private-key';
+  });
+
   const provider = new FirebaseProvider();
 
   it('returns uid and email from a valid ID token', async () => {
