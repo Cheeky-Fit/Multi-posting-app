@@ -1,4 +1,5 @@
 import { CloudflareStorage } from './cloudflare.storage';
+import { GcsStorage } from './gcs.storage';
 import { IUploadProvider } from './upload.interface';
 import { LocalStorage } from './local.storage';
 
@@ -17,6 +18,13 @@ export class UploadFactory {
           process.env.CLOUDFLARE_REGION!,
           process.env.CLOUDFLARE_BUCKETNAME!,
           process.env.CLOUDFLARE_BUCKET_URL!
+        );
+      case 'gcs':
+        return new GcsStorage(
+          process.env.GCS_BUCKET!,
+          process.env.GCS_PUBLIC_URL ||
+            `https://storage.googleapis.com/${process.env.GCS_BUCKET}`,
+          process.env.GCS_PROJECT_ID
         );
       default:
         throw new Error(`Invalid storage type ${storageProvider}`);
