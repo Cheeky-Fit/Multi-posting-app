@@ -147,54 +147,15 @@ git checkout feat/cheeky-social-portal
 pnpm install
 ```
 
-### 2. Environment file
+### 2. Environment + Firebase credentials
 
-```bash
-cp .env.cheeky.example .env
-```
+Ask a Cheeky maintainer for the local `.env` and Firebase Admin JSON (do not commit either).
 
-Edit `.env` for **local** use (example values that match `docker-compose.dev.yaml`):
+1. Place `.env` in the repo root
+2. Place the Admin JSON at `secrets/firebase-admin.json` (gitignored)
+3. Confirm the path in `.env` matches where you saved the JSON
 
-```bash
-DATABASE_URL="postgresql://postiz-local:postiz-local-pwd@localhost:5432/postiz-db-local"
-REDIS_URL="redis://localhost:6379"
-JWT_SECRET="change-me-to-a-long-random-string"
-MAIN_URL="http://localhost:4200"
-FRONTEND_URL="http://localhost:4200"
-NEXT_PUBLIC_BACKEND_URL="http://localhost:3000"
-BACKEND_INTERNAL_URL="http://localhost:3000"
-TEMPORAL_ADDRESS="localhost:7233"
-STORAGE_PROVIDER="local"
-UPLOAD_DIRECTORY="./uploads"
-NOT_SECURED="true"
-IS_GENERAL="true"
-DISABLE_REGISTRATION="false"
-NEXT_PUBLIC_CHEEKY_MODE="true"
-
-FIREBASE_PROJECT_ID="cheeky-b0098"
-FIREBASE_SERVICE_ACCOUNT_PATH="D:/path/to/Multi-posting-app/secrets/firebase-admin.json"
-
-# Web config from Firebase Console → Project settings → Your apps
-NEXT_PUBLIC_FIREBASE_API_KEY="..."
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="cheeky-b0098.firebaseapp.com"
-NEXT_PUBLIC_FIREBASE_PROJECT_ID="cheeky-b0098"
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="cheeky-b0098.firebasestorage.app"
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="1024449009049"
-NEXT_PUBLIC_FIREBASE_APP_ID="1:1024449009049:web:4b0a356e7d58a9a8c82f08"
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID="G-LWX58PZ8C2"
-```
-
-Use an **absolute path** for `FIREBASE_SERVICE_ACCOUNT_PATH` on Windows if relative paths fail when the API is started from `apps/backend`.
-
-### 3. Firebase Admin key (required for Google login)
-
-1. Open [Firebase Console → Service accounts](https://console.firebase.google.com/project/cheeky-b0098/settings/serviceaccounts/adminsdk)
-2. **Generate new private key** → download JSON
-3. Save as `secrets/firebase-admin.json` (folder is gitignored — never commit this file)
-4. Confirm Auth → Sign-in method → **Google** is enabled
-5. Confirm **Authorized domains** includes `localhost`
-
-### 4. Start infrastructure
+### 3. Start infrastructure
 
 ```bash
 pnpm dev:docker
@@ -203,13 +164,13 @@ pnpm dev:docker
 
 This starts Postgres, Redis, Temporal (+ UI on http://localhost:8080), pgAdmin, RedisInsight.
 
-### 5. Database schema
+### 4. Database schema
 
 ```bash
 pnpm prisma-db-push
 ```
 
-### 6. Run the app
+### 5. Run the app
 
 **Recommended for day-to-day (UI + API):**
 
@@ -234,34 +195,13 @@ pnpm --filter ./apps/backend exec dotenv -e ../../.env -- node ./dist/apps/backe
 
 (First run `pnpm --filter ./apps/backend exec nest build` if `dist/` is missing.)
 
-### 7. Sign in
+### 6. Sign in
 
 1. Open http://localhost:4200/auth  
 2. **Continue with Google**  
 3. First load of `/launches` can take 1–2 minutes while Next.js compiles — wait; later loads are fast  
 
 You should land on the calendar with Cheeky Social branding.
-
----
-
-## Environment reference
-
-Template: [`.env.cheeky.example`](.env.cheeky.example)
-
-| Variable | Required | Notes |
-|----------|----------|--------|
-| `DATABASE_URL` | Yes | Local compose user/pass: `postiz-local` / `postiz-local-pwd` |
-| `REDIS_URL` | Yes | `redis://localhost:6379` locally |
-| `JWT_SECRET` | Yes | Long random string |
-| `FRONTEND_URL` / `MAIN_URL` | Yes | Public URL of the UI (no trailing slash) |
-| `NEXT_PUBLIC_BACKEND_URL` | Yes | Browser → API base (`http://localhost:3000` locally) |
-| `BACKEND_INTERNAL_URL` | Yes | Server-side → API |
-| `TEMPORAL_ADDRESS` | Yes | `localhost:7233` or GKE Temporal |
-| `STORAGE_PROVIDER` | Yes | `local` (laptop) or `gcs` (GCP) |
-| `NEXT_PUBLIC_CHEEKY_MODE` | Yes | `true` enables Cheeky UI + Firebase Google button |
-| `FIREBASE_SERVICE_ACCOUNT_PATH` | Yes (local/prod) | Path to Admin SDK JSON |
-| `NEXT_PUBLIC_FIREBASE_*` | Yes | Firebase web app config |
-| `GCS_*` | Prod | When `STORAGE_PROVIDER=gcs` |
 
 ---
 
@@ -290,9 +230,9 @@ See: [`docs/superpowers/runbooks/cheeky-staff-superadmin.md`](docs/superpowers/r
 | Symptom | Fix |
 |---------|-----|
 | `Invalid provider token` | Missing/wrong `secrets/firebase-admin.json` or path; restart API after adding it |
-| `Failed to fetch` on login | API not listening on `:3000` — start backend (see step 6) |
+| `Failed to fetch` on login | API not listening on `:3000` — start backend (see step 5) |
 | `/launches` 404 after login | Clear `apps/frontend/.next`, restart frontend, wait for first compile |
-| Postgres auth failed | Use compose credentials `postiz-local` / `postiz-local-pwd` |
+| Postgres auth failed | Confirm `DATABASE_URL` in the `.env` you were given matches `docker-compose.dev.yaml` |
 | Sentry / `sentry_cpu_profiler` crash | Fixed by lazy profiling load; ensure latest `feat/cheeky-social-portal` |
 | Docker not found | Install/start Docker Desktop, then retry `pnpm dev:docker` |
 
