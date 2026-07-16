@@ -31,9 +31,11 @@ export const FirebaseGoogleProvider = ({ mode, company }: Props) => {
   const fetch = useFetch();
   const t = useT();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const onClick = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const auth = getFirebaseAuth();
       const result = await signInWithPopup(auth, new GoogleAuthProvider());
@@ -73,16 +75,30 @@ export const FirebaseGoogleProvider = ({ mode, company }: Props) => {
       }
     } catch (e) {
       console.error(e);
+      setError(
+        e instanceof Error
+          ? e.message
+          : t('auth_failed', 'Sign-in failed. Please try again.')
+      );
       setLoading(false);
     }
-  }, [company, fetch, mode]);
+  }, [company, fetch, mode, t]);
 
   return (
-    <div
-      onClick={loading ? undefined : onClick}
-      className="cursor-pointer flex-1 bg-white h-[52px] rounded-[10px] flex justify-center items-center text-[#0E0E0E] gap-[10px]"
-    >
-      <span>{t('continue_with_google', 'Continue with Google')}</span>
+    <div className="flex flex-col gap-[8px] flex-1">
+      <div
+        onClick={loading ? undefined : onClick}
+        className="cursor-pointer flex-1 bg-white h-[52px] rounded-[10px] flex justify-center items-center text-[#0E0E0E] gap-[10px]"
+      >
+        <span>
+          {loading
+            ? t('signing_in', 'Signing in…')
+            : t('continue_with_google', 'Continue with Google')}
+        </span>
+      </div>
+      {error ? (
+        <div className="text-[12px] text-red-400 text-center">{error}</div>
+      ) : null}
     </div>
   );
 };
